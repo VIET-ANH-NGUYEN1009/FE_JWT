@@ -1,33 +1,38 @@
 import axios from "axios";
-// Set config defaults when creating the instance
+
+/**
+ * Axios instance
+ */
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080",
+  // withCredentials: true,
 });
+console.log("ENV backend:", import.meta.env.VITE_BACKEND_URL);
 
-// Alter defaults after instance has been created
-//instance.defaults.headers.common["Authorization"] = AUTH_TOKEN;
-
-// Add a request interceptor
-axios.interceptors.request.use(function (config) {
-    // Do something before request is sent
+/**
+ * REQUEST INTERCEPTOR
+ */
+instance.interceptors.request.use(
+  (config) => {
+    console.log("👉 Request:", config.method?.toUpperCase(), config.url);
     return config;
-  }, function (error) {
-    // Do something with request error
-    return Promise.reject(error);
   },
-  { synchronous: true, runWhen: () => /* This function returns true */}
+  (error) => Promise.reject(error),
 );
 
-// Add a response interceptor
-axios.interceptors.response.use(function onFulfilled(response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    return response;
-  }, function onRejected(error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
+/**
+ * RESPONSE INTERCEPTOR
+ * 👉 TRẢ VỀ response.data
+ */
+instance.interceptors.response.use(
+  (response) => {
+    console.log("✅ Response:", response.status, response.config.url);
+    return response; // ⭐ QUAN TRỌNG
+  },
+  (error) => {
+    console.error("❌ Error:", error.response?.status, error.message);
     return Promise.reject(error);
-  });
-
+  },
+);
 
 export default instance;
